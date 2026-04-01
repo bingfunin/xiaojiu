@@ -40,15 +40,13 @@ function loadVideos() {
     // 清空视频数组
     allVideos = [];
     
-    // 假设视频命名是从1.mp4开始的连续数字
-    let videoCount = 0;
-    const maxVideos = 50; // 设置一个合理的上限以避免无限循环
+    // 直接加载固定数量的视频（4个）
+    const maxVideos = 4;
     
-    // 创建一个视频加载函数
-    function tryLoadVideo(index) {
-        console.log(`尝试加载视频: video/${index}.mp4`);
+    for (let index = 1; index <= maxVideos; index++) {
+        console.log(`创建视频 ${index}`);
         
-        // 先创建视频元素（不等待加载）
+        // 创建视频元素
         const videoItem = document.createElement('div');
         videoItem.className = 'video-item';
         
@@ -110,32 +108,14 @@ function loadVideos() {
             openVideoModal(index);
         };
         
-        // 先添加到画廊
+        // 添加到画廊
         gallery.appendChild(videoItem);
         
         // 将视频添加到数组中
         allVideos.push(`video/${index}.mp4`);
-        
-        // 尝试验证视频是否存在
-        const video = document.createElement('video');
-        video.src = `video/${index}.mp4`;
-        video.muted = true;
-        video.preload = 'metadata';
-        
-        video.onloadedmetadata = function() {
-            console.log(`视频 ${index}.mp4 验证成功`);
-            // 继续尝试加载下一个视频
-            tryLoadVideo(index + 1);
-        };
-        
-        video.onerror = function(e) {
-            // 视频加载失败，停止加载
-            console.error(`视频 ${index}.mp4 加载失败，停止加载`);
-        };
     }
     
-    // 开始加载第一个视频
-    tryLoadVideo(1);
+    console.log(`已创建 ${allVideos.length} 个视频`);
 }
 
 // 打开视频模态框并播放指定索引的视频

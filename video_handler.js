@@ -134,36 +134,10 @@ function openVideoModal(videoIndex) {
     modalVideo.setAttribute('webkit-playsinline', '');
     modalVideo.muted = false;
     
-    // 微信浏览器特殊处理：先静音播放
-    const { isWeChat } = checkBrowserEnvironment();
-    if (isWeChat) {
-        modalVideo.muted = true;
-    }
-    
-    // 尝试自动播放
-    const playPromise = modalVideo.play();
-    
-    if (playPromise !== undefined) {
-        playPromise.catch(error => {
-            console.error('自动播放失败:', error);
-            // 如果自动播放失败，静音后重试
-            modalVideo.muted = true;
-            modalVideo.play().catch(e => console.error('静音播放也失败:', e));
-        });
-    }
-    
-    // 添加视频错误监听
-    modalVideo.onerror = function(e) {
-        console.error('视频播放错误:', e);
-        console.error('视频错误详情:', modalVideo.error);
-        
-        // 如果是微信浏览器，尝试重新加载
-        if (isWeChat) {
-            console.log('微信浏览器检测到错误，尝试重新加载');
-            modalVideo.load();
-            modalVideo.play().catch(e => console.error('重新加载失败:', e));
-        }
-    };
+    // 自动播放
+    modalVideo.play().catch(error => {
+        console.error('自动播放失败:', error);
+    });
     
     // 显示导航指示器
     showVideoNavIndicators();
@@ -195,11 +169,7 @@ function nextVideo() {
         currentVideoIndex = (currentVideoIndex + 1) % allVideos.length;
         modalVideo.src = allVideos[currentVideoIndex];
         modalVideo.type = 'video/mp4';
-        
-        const { isWeChat } = checkBrowserEnvironment();
-        if (isWeChat) {
-            modalVideo.muted = true;
-        }
+        modalVideo.muted = false;
         
         modalVideo.play().catch(e => console.error('播放下一个视频失败:', e));
     }
@@ -214,11 +184,7 @@ function prevVideo() {
         currentVideoIndex = (currentVideoIndex - 1 + allVideos.length) % allVideos.length;
         modalVideo.src = allVideos[currentVideoIndex];
         modalVideo.type = 'video/mp4';
-        
-        const { isWeChat } = checkBrowserEnvironment();
-        if (isWeChat) {
-            modalVideo.muted = true;
-        }
+        modalVideo.muted = false;
         
         modalVideo.play().catch(e => console.error('播放上一个视频失败:', e));
     }
@@ -237,16 +203,6 @@ function closeVideoModal(event) {
 
 // 页面加载完成后自动加载视频
 document.addEventListener('DOMContentLoaded', function() {
-    const { isWeChat } = checkBrowserEnvironment();
-    
-    // 如果是微信浏览器，显示提示信息
-    if (isWeChat) {
-        const hint = document.getElementById('videoHint');
-        if (hint) {
-            hint.style.display = 'block';
-        }
-    }
-    
     loadVideos();
     
     // 为视频导航区域添加事件监听器

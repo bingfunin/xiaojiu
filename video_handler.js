@@ -4,9 +4,35 @@
 let allVideos = [];
 let currentVideoIndex = 0;
 
-// 动态加载视频
+// 检测是否是微信浏览器
+function isWeChatBrowser() {
+    return /micromessenger/i.test(navigator.userAgent);
+}
+
+// 检测是否是苹果设备
+function isIOSDevice() {
+    return /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+}
+
+// 检测浏览器环境
+function checkBrowserEnvironment() {
+    const isWeChat = isWeChatBrowser();
+    const isIOS = isIOSDevice();
+    
+    if (isWeChat) {
+        console.log('检测到微信浏览器');
+    }
+    if (isIOS) {
+        console.log('检测到iOS设备');
+    }
+    
+    return { isWeChat, isIOS };
+}
+
+// 动态加载视频（优化版：懒加载）
 function loadVideos() {
     const gallery = document.getElementById('videoGallery');
+    const { isWeChat, isIOS } = checkBrowserEnvironment();
     
     // 清空现有内容
     gallery.innerHTML = '';
@@ -20,40 +46,83 @@ function loadVideos() {
     
     // 创建一个视频加载函数
     function tryLoadVideo(index) {
+        console.log(`尝试加载视频: video/${index}.mp4`);
+        
         const video = document.createElement('video');
         video.src = `video/${index}.mp4`;
-        video.muted = true; // 静音加载以避免自动播放问题
-        video.preload = 'metadata';
-        video.setAttribute('playsinline', ''); // iOS必需：防止全屏播放
-        video.setAttribute('webkit-playsinline', ''); // iOS旧版本兼容
+        video.muted = true;
+        video.preload = 'metadata'; // 只加载元数据，不加载完整视频
+        video.setAttribute('playsinline', '');
+        video.setAttribute('webkit-playsinline', '');
         
         video.onloadedmetadata = function() {
+            console.log(`视频 ${index}.mp4 加载成功`);
+            
             // 视频加载成功，添加到画廊
             const videoItem = document.createElement('div');
             videoItem.className = 'video-item';
             
-            const videoElement = document.createElement('video');
-            videoElement.src = `video/${index}.mp4`;
-            videoElement.type = 'video/mp4'; // 明确指定视频类型
-            videoElement.muted = true;
-            videoElement.preload = 'metadata';
-            videoElement.setAttribute('playsinline', ''); // iOS必需
-            videoElement.setAttribute('webkit-playsinline', ''); // iOS旧版本兼容
-            videoElement.style.width = '100%';
-            videoElement.style.height = '100%';
-            videoElement.style.objectFit = 'cover';
-            
-            // 添加播放按钮
-            const playButton = document.createElement('div');
-            playButton.className = 'play-button';
-            
-            videoItem.appendChild(videoElement);
-            videoItem.appendChild(playButton);
-            
-            // 点击视频时打开模态框
-            videoItem.onclick = function() {
-                openVideoModal(index);
-            };
+            // 苹果微信浏览器使用简单的 div 容器
+            if (isIOS && isWeChat) {
+                console.log('苹果微信浏览器，使用占位符');
+                
+                // 创建背景容器
+                const bgDiv = document.createElement('div');
+                bgDiv.style.width = '100%';
+                bgDiv.style.height = '100%';
+                bgDiv.style.background = 'linear-gradient(135deg, #1e1e2f, #2c0a2d)';
+                bgDiv.style.position = 'absolute';
+                bgDiv.style.top = '0';
+                bgDiv.style.left = '0';
+                bgDiv.style.display = 'flex';
+                bgDiv.style.alignItems = 'center';
+                bgDiv.style.justifyContent = 'center';
+                
+                // 添加视频编号
+                const videoNumber = document.createElement('div');
+                videoNumber.textContent = `视频 ${index}`;
+                videoNumber.style.color = '#ffd700';
+                videoNumber.style.fontSize = '1.2rem';
+                videoNumber.style.fontWeight = 'bold';
+                videoNumber.style.marginBottom = '10px';
+                
+                // 添加播放按钮
+                const playButton = document.createElement('div');
+                playButton.className = 'play-button';
+                
+                bgDiv.appendChild(videoNumber);
+                bgDiv.appendChild(playButton);
+                videoItem.appendChild(bgDiv);
+                
+                // 点击时打开模态框
+                videoItem.onclick = function() {
+                    openVideoModal(index);
+                };
+            } else {
+                // 其他浏览器使用普通视频元素
+                const videoElement = document.createElement('video');
+                videoElement.type = 'video/mp4';
+                videoElement.muted = true;
+                videoElement.preload = 'none'; // 不预加载，节省流量和内存
+                videoElement.setAttribute('playsinline', '');
+                videoElement.setAttribute('webkit-playsinline', '');
+                videoElement.style.width = '100%';
+                videoElement.style.height = '100%';
+                videoElement.style.objectFit = 'cover';
+                videoElement.style.background = '#000'; // 黑色背景
+                
+                // 添加播放按钮
+                const playButton = document.createElement('div');
+                playButton.className = 'play-button';
+                
+                videoItem.appendChild(videoElement);
+                videoItem.appendChild(playButton);
+                
+                // 点击视频时打开模态框
+                videoItem.onclick = function() {
+                    openVideoModal(index);
+                };
+            }
             
             gallery.appendChild(videoItem);
             
@@ -64,10 +133,9 @@ function loadVideos() {
             tryLoadVideo(index + 1);
         };
         
-        video.onerror = function() {
+        video.onerror = function(e) {
             // 视频加载失败，停止加载
-            // 这意味着我们已经加载了所有存在的视频
-            console.log(`视频 ${index}.mp4 加载失败，停止加载`);
+            console.error(`视频 ${index}.mp4 加载失败`, e);
         };
     }
     
@@ -77,27 +145,50 @@ function loadVideos() {
 
 // 打开视频模态框并播放指定索引的视频
 function openVideoModal(videoIndex) {
+    console.log(`打开视频模态框，索引: ${videoIndex}`);
     currentVideoIndex = videoIndex - 1; // 转换为0基索引
     document.getElementById('videoModal').style.display = 'flex';
     
     const modalVideo = document.getElementById('modalVideo');
-    modalVideo.src = allVideos[currentVideoIndex];
-    modalVideo.type = 'video/mp4'; // 明确指定视频类型
-    modalVideo.setAttribute('playsinline', ''); // iOS必需
-    modalVideo.setAttribute('webkit-playsinline', ''); // iOS旧版本兼容
-    modalVideo.muted = false; // 取消静音
+    const videoSrc = allVideos[currentVideoIndex];
+    console.log(`视频源: ${videoSrc}`);
     
-    // 尝试自动播放，处理可能的自动播放限制
+    modalVideo.src = videoSrc;
+    modalVideo.type = 'video/mp4';
+    modalVideo.setAttribute('playsinline', '');
+    modalVideo.setAttribute('webkit-playsinline', '');
+    modalVideo.muted = false;
+    
+    // 微信浏览器特殊处理：先静音播放
+    const { isWeChat } = checkBrowserEnvironment();
+    if (isWeChat) {
+        modalVideo.muted = true;
+    }
+    
+    // 尝试自动播放
     const playPromise = modalVideo.play();
     
     if (playPromise !== undefined) {
         playPromise.catch(error => {
-            console.log('自动播放失败，可能需要用户交互:', error);
+            console.error('自动播放失败:', error);
             // 如果自动播放失败，静音后重试
             modalVideo.muted = true;
-            modalVideo.play();
+            modalVideo.play().catch(e => console.error('静音播放也失败:', e));
         });
     }
+    
+    // 添加视频错误监听
+    modalVideo.onerror = function(e) {
+        console.error('视频播放错误:', e);
+        console.error('视频错误详情:', modalVideo.error);
+        
+        // 如果是微信浏览器，尝试重新加载
+        if (isWeChat) {
+            console.log('微信浏览器检测到错误，尝试重新加载');
+            modalVideo.load();
+            modalVideo.play().catch(e => console.error('重新加载失败:', e));
+        }
+    };
     
     // 显示导航指示器
     showVideoNavIndicators();
@@ -123,26 +214,38 @@ function showVideoNavIndicators() {
 // 播放下一个视频
 function nextVideo() {
     if (allVideos.length > 0) {
-        // 停止当前视频
         const modalVideo = document.getElementById('modalVideo');
         modalVideo.pause();
         
         currentVideoIndex = (currentVideoIndex + 1) % allVideos.length;
         modalVideo.src = allVideos[currentVideoIndex];
-        modalVideo.play();
+        modalVideo.type = 'video/mp4';
+        
+        const { isWeChat } = checkBrowserEnvironment();
+        if (isWeChat) {
+            modalVideo.muted = true;
+        }
+        
+        modalVideo.play().catch(e => console.error('播放下一个视频失败:', e));
     }
 }
 
 // 播放上一个视频
 function prevVideo() {
     if (allVideos.length > 0) {
-        // 停止当前视频
         const modalVideo = document.getElementById('modalVideo');
         modalVideo.pause();
         
         currentVideoIndex = (currentVideoIndex - 1 + allVideos.length) % allVideos.length;
         modalVideo.src = allVideos[currentVideoIndex];
-        modalVideo.play();
+        modalVideo.type = 'video/mp4';
+        
+        const { isWeChat } = checkBrowserEnvironment();
+        if (isWeChat) {
+            modalVideo.muted = true;
+        }
+        
+        modalVideo.play().catch(e => console.error('播放上一个视频失败:', e));
     }
 }
 
@@ -159,6 +262,16 @@ function closeVideoModal(event) {
 
 // 页面加载完成后自动加载视频
 document.addEventListener('DOMContentLoaded', function() {
+    const { isWeChat } = checkBrowserEnvironment();
+    
+    // 如果是微信浏览器，显示提示信息
+    if (isWeChat) {
+        const hint = document.getElementById('videoHint');
+        if (hint) {
+            hint.style.display = 'block';
+        }
+    }
+    
     loadVideos();
     
     // 为视频导航区域添加事件监听器

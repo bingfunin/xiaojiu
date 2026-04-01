@@ -248,6 +248,7 @@ h2::before {
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
     border: 2px solid rgba(255, 215, 0, 0.3);
     cursor: pointer;
+    background: #000;
 }
 
 .video-item:hover {
@@ -261,6 +262,7 @@ h2::before {
     object-fit: cover;
     -webkit-playsinline: true; /* iOS Safari */
     playsinline: true; /* 标准属性 */
+    background: #000;
 }
 
 .video-item .play-button {
@@ -277,6 +279,7 @@ h2::before {
     justify-content: center;
     opacity: 0.9;
     transition: all 0.3s ease;
+    z-index: 10;
 }
 
 .video-item:hover .play-button {
@@ -291,10 +294,30 @@ h2::before {
     margin-left: 4px;
 }
 
+/* 视频加载中的占位符 */
+.video-item.loading::before {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 40px;
+    height: 40px;
+    border: 4px solid rgba(255, 215, 0, 0.3);
+    border-top-color: #ffd700;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
 /* 模态框视频兼容性样式 */
 #modalVideo {
     -webkit-playsinline: true;
     playsinline: true;
     max-width: 90vw;
     max-height: 90vh;
+    background: #000;
 }

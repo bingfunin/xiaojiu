@@ -121,11 +121,10 @@ function loadVideos() {
 // 打开视频模态框并播放指定索引的视频
 function openVideoModal(videoIndex) {
     console.log(`打开视频模态框，索引: ${videoIndex}`);
-    currentVideoIndex = videoIndex - 1; // 转换为0基索引
     document.getElementById('videoModal').style.display = 'flex';
     
     const modalVideo = document.getElementById('modalVideo');
-    const videoSrc = allVideos[currentVideoIndex];
+    const videoSrc = allVideos[videoIndex - 1];
     console.log(`视频源: ${videoSrc}`);
     
     modalVideo.src = videoSrc;
@@ -138,56 +137,6 @@ function openVideoModal(videoIndex) {
     modalVideo.play().catch(error => {
         console.error('自动播放失败:', error);
     });
-    
-    // 显示导航指示器
-    showVideoNavIndicators();
-}
-
-// 显示视频导航指示器
-function showVideoNavIndicators() {
-    const prevIndicator = document.querySelector('#videoPrevArea .nav-indicator');
-    const nextIndicator = document.querySelector('#videoNextArea .nav-indicator');
-    
-    if (prevIndicator && nextIndicator) {
-        prevIndicator.style.opacity = '1';
-        nextIndicator.style.opacity = '1';
-        
-        // 2秒后隐藏指示器
-        setTimeout(() => {
-            prevIndicator.style.opacity = '0';
-            nextIndicator.style.opacity = '0';
-        }, 2000);
-    }
-}
-
-// 播放下一个视频
-function nextVideo() {
-    if (allVideos.length > 0) {
-        const modalVideo = document.getElementById('modalVideo');
-        modalVideo.pause();
-        
-        currentVideoIndex = (currentVideoIndex + 1) % allVideos.length;
-        modalVideo.src = allVideos[currentVideoIndex];
-        modalVideo.type = 'video/mp4';
-        modalVideo.muted = false;
-        
-        modalVideo.play().catch(e => console.error('播放下一个视频失败:', e));
-    }
-}
-
-// 播放上一个视频
-function prevVideo() {
-    if (allVideos.length > 0) {
-        const modalVideo = document.getElementById('modalVideo');
-        modalVideo.pause();
-        
-        currentVideoIndex = (currentVideoIndex - 1 + allVideos.length) % allVideos.length;
-        modalVideo.src = allVideos[currentVideoIndex];
-        modalVideo.type = 'video/mp4';
-        modalVideo.muted = false;
-        
-        modalVideo.play().catch(e => console.error('播放上一个视频失败:', e));
-    }
 }
 
 // 关闭视频模态框
@@ -204,75 +153,4 @@ function closeVideoModal(event) {
 // 页面加载完成后自动加载视频
 document.addEventListener('DOMContentLoaded', function() {
     loadVideos();
-    
-    // 为视频导航区域添加事件监听器
-    const videoPrevArea = document.getElementById('videoPrevArea');
-    const videoNextArea = document.getElementById('videoNextArea');
-    
-    videoPrevArea.addEventListener('click', function(e) {
-        e.stopPropagation();
-        prevVideo();
-    });
-    
-    videoNextArea.addEventListener('click', function(e) {
-        e.stopPropagation();
-        nextVideo();
-    });
-    
-    // 添加视频导航区域的悬停效果
-    videoPrevArea.addEventListener('mouseenter', function() {
-        const indicator = this.querySelector('.nav-indicator');
-        if (indicator) indicator.style.opacity = '1';
-    });
-    
-    videoPrevArea.addEventListener('mouseleave', function() {
-        const indicator = this.querySelector('.nav-indicator');
-        if (indicator) indicator.style.opacity = '0';
-    });
-    
-    videoNextArea.addEventListener('mouseenter', function() {
-        const indicator = this.querySelector('.nav-indicator');
-        if (indicator) indicator.style.opacity = '1';
-    });
-    
-    videoNextArea.addEventListener('mouseleave', function() {
-        const indicator = this.querySelector('.nav-indicator');
-        if (indicator) indicator.style.opacity = '0';
-    });
-    
-    // 添加键盘导航支持
-    document.addEventListener('keydown', function(e) {
-        if (document.getElementById('videoModal').style.display === 'flex') {
-            if (e.key === 'ArrowLeft') {
-                prevVideo();
-            } else if (e.key === 'ArrowRight') {
-                nextVideo();
-            }
-        }
-    });
-    
-    // 添加触屏滑动支持
-    let touchStartX = 0;
-    let touchEndX = 0;
-    
-    document.getElementById('videoModal').addEventListener('touchstart', function(e) {
-        touchStartX = e.changedTouches[0].screenX;
-    });
-    
-    document.getElementById('videoModal').addEventListener('touchend', function(e) {
-        touchEndX = e.changedTouches[0].screenX;
-        handleVideoSwipe();
-    });
-    
-    function handleVideoSwipe() {
-        const swipeThreshold = 50; // 最小滑动距离
-        
-        if (touchStartX - touchEndX > swipeThreshold) {
-            // 向左滑动，播放下一个视频
-            nextVideo();
-        } else if (touchEndX - touchStartX > swipeThreshold) {
-            // 向右滑动，播放上一个视频
-            prevVideo();
-        }
-    }
 });

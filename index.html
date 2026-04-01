@@ -165,31 +165,34 @@
     </div>
 
     <!-- 视频播放模态框 -->
-    <div id="videoModal"
-        style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background-color:rgba(0,0,0,0.9);z-index:1000;justify-content:center;align-items:center;"
-        onclick="closeVideoModal(event)">
-        <span
-            style="position:absolute;top:20px;right:30px;color:#fff;font-size:50px;cursor:pointer;background:rgba(0,0,0,0.5);border-radius:50%;width:60px;height:60px;display:flex;align-items:center;justify-content:center;z-index:1002;"
-            onclick="closeVideoModal(event)">&times;</span>
-        <!-- 隐藏的导航区域 -->
-        <div id="videoPrevArea"
-            style="position:absolute;left:0;top:0;width:30%;height:100%;cursor:pointer;z-index:1001;">
-            <div class="nav-indicator prev"
-                style="position:absolute;top:50%;left:20px;transform:translateY(-50%);width:40px;height:40px;border-radius:50%;background:rgba(255,215,0,0.3);display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity 0.3s ease;">
-            </div>
+
+        <div id="videoModal"
+
+            style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background-color:rgba(0,0,0,0.9);z-index:1000;justify-content:center;align-items:center;"
+
+            onclick="closeVideoModal(event)">
+
+            <span
+
+                style="position:absolute;top:20px;right:30px;color:#fff;font-size:50px;cursor:pointer;background:rgba(0,0,0,0.5);border-radius:50%;width:60px;height:60px;display:flex;align-items:center;justify-content:center;z-index:1002;"
+
+                onclick="closeVideoModal(event)">&times;</span>
+
+            <video id="modalVideo"
+
+                style="max-width:90%;max-height:90%;border:3px solid #ffd700;border-radius:10px;box-shadow:0 0 20px rgba(255,215,0,0.5);"
+
+                type="video/mp4"
+
+                playsinline
+
+                webkit-playsinline>
+
+                您的浏览器不支持视频播放。
+
+            </video>
+
         </div>
-        <video id="modalVideo"
-            style="max-width:90%;max-height:90%;border:3px solid #ffd700;border-radius:10px;box-shadow:0 0 20px rgba(255,215,0,0.5);"
-            controls type="video/mp4" playsinline webkit-playsinline>
-            您的浏览器不支持视频播放。
-        </video>
-        <div id="videoNextArea"
-            style="position:absolute;right:0;top:0;width:30%;height:100%;cursor:pointer;z-index:1001;">
-            <div class="nav-indicator next"
-                style="position:absolute;top:50%;right:20px;transform:translateY(-50%);width:40px;height:40px;border-radius:50%;background:rgba(255,215,0,0.3);display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity 0.3s ease;">
-            </div>
-        </div>
-    </div>
 
     <!-- 引用外部JavaScript文件 -->
     <script src="data_handler.js"></script>

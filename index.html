@@ -129,6 +129,7 @@
             <h2>小视频</h2>
             <div class="gallery" id="videoGallery">
                 <!-- 视频将通过JavaScript动态加载 -->
+                <!-- ffmpeg -i input.mp4 -c:v libx264 -c:a aac output.mp4 -->
             </div>
         </div>
 
@@ -166,33 +167,23 @@
 
     <!-- 视频播放模态框 -->
 
-        <div id="videoModal"
+    <div id="videoModal"
+        style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background-color:rgba(0,0,0,0.9);z-index:1000;justify-content:center;align-items:center;"
+        onclick="closeVideoModal(event)">
 
-            style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background-color:rgba(0,0,0,0.9);z-index:1000;justify-content:center;align-items:center;"
+        <span
+            style="position:absolute;top:20px;right:30px;color:#fff;font-size:50px;cursor:pointer;background:rgba(0,0,0,0.5);border-radius:50%;width:60px;height:60px;display:flex;align-items:center;justify-content:center;z-index:1002;"
+            onclick="closeVideoModal(event)">&times;</span>
 
-            onclick="closeVideoModal(event)">
+        <video id="modalVideo"
+            style="max-width:90%;max-height:90%;border:3px solid #ffd700;border-radius:10px;box-shadow:0 0 20px rgba(255,215,0,0.5);"
+            type="video/mp4" playsinline webkit-playsinline>
 
-            <span
+            您的浏览器不支持视频播放。
 
-                style="position:absolute;top:20px;right:30px;color:#fff;font-size:50px;cursor:pointer;background:rgba(0,0,0,0.5);border-radius:50%;width:60px;height:60px;display:flex;align-items:center;justify-content:center;z-index:1002;"
+        </video>
 
-                onclick="closeVideoModal(event)">&times;</span>
-
-            <video id="modalVideo"
-
-                style="max-width:90%;max-height:90%;border:3px solid #ffd700;border-radius:10px;box-shadow:0 0 20px rgba(255,215,0,0.5);"
-
-                type="video/mp4"
-
-                playsinline
-
-                webkit-playsinline>
-
-                您的浏览器不支持视频播放。
-
-            </video>
-
-        </div>
+    </div>
 
     <!-- 引用外部JavaScript文件 -->
     <script src="data_handler.js"></script>

@@ -24,6 +24,8 @@ function loadVideos() {
         video.src = `video/${index}.mp4`;
         video.muted = true; // 静音加载以避免自动播放问题
         video.preload = 'metadata';
+        video.setAttribute('playsinline', ''); // iOS必需：防止全屏播放
+        video.setAttribute('webkit-playsinline', ''); // iOS旧版本兼容
         
         video.onloadedmetadata = function() {
             // 视频加载成功，添加到画廊
@@ -32,8 +34,11 @@ function loadVideos() {
             
             const videoElement = document.createElement('video');
             videoElement.src = `video/${index}.mp4`;
+            videoElement.type = 'video/mp4'; // 明确指定视频类型
             videoElement.muted = true;
             videoElement.preload = 'metadata';
+            videoElement.setAttribute('playsinline', ''); // iOS必需
+            videoElement.setAttribute('webkit-playsinline', ''); // iOS旧版本兼容
             videoElement.style.width = '100%';
             videoElement.style.height = '100%';
             videoElement.style.objectFit = 'cover';
@@ -62,6 +67,7 @@ function loadVideos() {
         video.onerror = function() {
             // 视频加载失败，停止加载
             // 这意味着我们已经加载了所有存在的视频
+            console.log(`视频 ${index}.mp4 加载失败，停止加载`);
         };
     }
     
@@ -76,8 +82,22 @@ function openVideoModal(videoIndex) {
     
     const modalVideo = document.getElementById('modalVideo');
     modalVideo.src = allVideos[currentVideoIndex];
+    modalVideo.type = 'video/mp4'; // 明确指定视频类型
+    modalVideo.setAttribute('playsinline', ''); // iOS必需
+    modalVideo.setAttribute('webkit-playsinline', ''); // iOS旧版本兼容
     modalVideo.muted = false; // 取消静音
-    modalVideo.play(); // 自动播放
+    
+    // 尝试自动播放，处理可能的自动播放限制
+    const playPromise = modalVideo.play();
+    
+    if (playPromise !== undefined) {
+        playPromise.catch(error => {
+            console.log('自动播放失败，可能需要用户交互:', error);
+            // 如果自动播放失败，静音后重试
+            modalVideo.muted = true;
+            modalVideo.play();
+        });
+    }
     
     // 显示导航指示器
     showVideoNavIndicators();

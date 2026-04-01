@@ -48,94 +48,89 @@ function loadVideos() {
     function tryLoadVideo(index) {
         console.log(`尝试加载视频: video/${index}.mp4`);
         
+        // 先创建视频元素（不等待加载）
+        const videoItem = document.createElement('div');
+        videoItem.className = 'video-item';
+        
+        // 苹果微信浏览器使用简单的 div 容器
+        if (isIOS && isWeChat) {
+            console.log('苹果微信浏览器，使用占位符');
+            
+            // 创建背景容器
+            const bgDiv = document.createElement('div');
+            bgDiv.style.width = '100%';
+            bgDiv.style.height = '100%';
+            bgDiv.style.background = 'linear-gradient(135deg, #1e1e2f, #2c0a2d)';
+            bgDiv.style.position = 'absolute';
+            bgDiv.style.top = '0';
+            bgDiv.style.left = '0';
+            bgDiv.style.display = 'flex';
+            bgDiv.style.flexDirection = 'column';
+            bgDiv.style.alignItems = 'center';
+            bgDiv.style.justifyContent = 'center';
+            
+            // 添加视频编号
+            const videoNumber = document.createElement('div');
+            videoNumber.textContent = `视频 ${index}`;
+            videoNumber.style.color = '#ffd700';
+            videoNumber.style.fontSize = '1.2rem';
+            videoNumber.style.fontWeight = 'bold';
+            videoNumber.style.marginBottom = '10px';
+            
+            // 添加播放按钮
+            const playButton = document.createElement('div');
+            playButton.className = 'play-button';
+            
+            bgDiv.appendChild(videoNumber);
+            bgDiv.appendChild(playButton);
+            videoItem.appendChild(bgDiv);
+        } else {
+            // 其他浏览器使用普通视频元素
+            const videoElement = document.createElement('video');
+            videoElement.type = 'video/mp4';
+            videoElement.muted = true;
+            videoElement.preload = 'none'; // 不预加载，节省流量和内存
+            videoElement.setAttribute('playsinline', '');
+            videoElement.setAttribute('webkit-playsinline', '');
+            videoElement.style.width = '100%';
+            videoElement.style.height = '100%';
+            videoElement.style.objectFit = 'cover';
+            videoElement.style.background = '#000'; // 黑色背景
+            
+            // 添加播放按钮
+            const playButton = document.createElement('div');
+            playButton.className = 'play-button';
+            
+            videoItem.appendChild(videoElement);
+            videoItem.appendChild(playButton);
+        }
+        
+        // 点击时打开模态框
+        videoItem.onclick = function() {
+            openVideoModal(index);
+        };
+        
+        // 先添加到画廊
+        gallery.appendChild(videoItem);
+        
+        // 将视频添加到数组中
+        allVideos.push(`video/${index}.mp4`);
+        
+        // 尝试验证视频是否存在
         const video = document.createElement('video');
         video.src = `video/${index}.mp4`;
         video.muted = true;
-        video.preload = 'metadata'; // 只加载元数据，不加载完整视频
-        video.setAttribute('playsinline', '');
-        video.setAttribute('webkit-playsinline', '');
+        video.preload = 'metadata';
         
         video.onloadedmetadata = function() {
-            console.log(`视频 ${index}.mp4 加载成功`);
-            
-            // 视频加载成功，添加到画廊
-            const videoItem = document.createElement('div');
-            videoItem.className = 'video-item';
-            
-            // 苹果微信浏览器使用简单的 div 容器
-            if (isIOS && isWeChat) {
-                console.log('苹果微信浏览器，使用占位符');
-                
-                // 创建背景容器
-                const bgDiv = document.createElement('div');
-                bgDiv.style.width = '100%';
-                bgDiv.style.height = '100%';
-                bgDiv.style.background = 'linear-gradient(135deg, #1e1e2f, #2c0a2d)';
-                bgDiv.style.position = 'absolute';
-                bgDiv.style.top = '0';
-                bgDiv.style.left = '0';
-                bgDiv.style.display = 'flex';
-                bgDiv.style.alignItems = 'center';
-                bgDiv.style.justifyContent = 'center';
-                
-                // 添加视频编号
-                const videoNumber = document.createElement('div');
-                videoNumber.textContent = `视频 ${index}`;
-                videoNumber.style.color = '#ffd700';
-                videoNumber.style.fontSize = '1.2rem';
-                videoNumber.style.fontWeight = 'bold';
-                videoNumber.style.marginBottom = '10px';
-                
-                // 添加播放按钮
-                const playButton = document.createElement('div');
-                playButton.className = 'play-button';
-                
-                bgDiv.appendChild(videoNumber);
-                bgDiv.appendChild(playButton);
-                videoItem.appendChild(bgDiv);
-                
-                // 点击时打开模态框
-                videoItem.onclick = function() {
-                    openVideoModal(index);
-                };
-            } else {
-                // 其他浏览器使用普通视频元素
-                const videoElement = document.createElement('video');
-                videoElement.type = 'video/mp4';
-                videoElement.muted = true;
-                videoElement.preload = 'none'; // 不预加载，节省流量和内存
-                videoElement.setAttribute('playsinline', '');
-                videoElement.setAttribute('webkit-playsinline', '');
-                videoElement.style.width = '100%';
-                videoElement.style.height = '100%';
-                videoElement.style.objectFit = 'cover';
-                videoElement.style.background = '#000'; // 黑色背景
-                
-                // 添加播放按钮
-                const playButton = document.createElement('div');
-                playButton.className = 'play-button';
-                
-                videoItem.appendChild(videoElement);
-                videoItem.appendChild(playButton);
-                
-                // 点击视频时打开模态框
-                videoItem.onclick = function() {
-                    openVideoModal(index);
-                };
-            }
-            
-            gallery.appendChild(videoItem);
-            
-            // 将视频添加到数组中
-            allVideos.push(`video/${index}.mp4`);
-            
+            console.log(`视频 ${index}.mp4 验证成功`);
             // 继续尝试加载下一个视频
             tryLoadVideo(index + 1);
         };
         
         video.onerror = function(e) {
             // 视频加载失败，停止加载
-            console.error(`视频 ${index}.mp4 加载失败`, e);
+            console.error(`视频 ${index}.mp4 加载失败，停止加载`);
         };
     }
     
